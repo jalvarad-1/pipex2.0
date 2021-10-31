@@ -6,7 +6,7 @@
 /*   By: jalvarad <jalvarad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/19 12:00:34 by jalvarad          #+#    #+#             */
-/*   Updated: 2021/09/25 11:53:05 by jalvarad         ###   ########.fr       */
+/*   Updated: 2021/10/31 10:45:25 by jalvarad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,4 +99,37 @@ void	del_split(char **split)
 		i++;
 	}
 	free(split);
+}
+
+t_cmds	*ft_lstnew(char **content)
+{
+	t_cmds	*a;
+
+	a = malloc(sizeof(t_cmds));
+	if (!a)
+		return (NULL);
+	a->content = content;
+	a->next = NULL;
+	return (a);
+}
+
+void	ft_lstadd_back(t_cmds **lst, t_cmds *new)
+{
+	t_cmds	*aux;
+
+	if (!*lst)
+		*lst = new;
+	else
+	{
+		aux = *lst;
+		while (lst)
+		{
+			if (!aux->next)
+			{
+				aux->next = new;
+				break ;
+			}
+			aux = aux->next;
+		}
+	}
 }

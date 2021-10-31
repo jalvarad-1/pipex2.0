@@ -6,7 +6,7 @@
 /*   By: jalvarad <jalvarad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/25 11:40:36 by jalvarad          #+#    #+#             */
-/*   Updated: 2021/09/25 11:57:01 by jalvarad         ###   ########.fr       */
+/*   Updated: 2021/10/31 11:35:46 by jalvarad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,12 @@ void	ft_putstr_fd(char *s, int fd)
 		write(fd, s++, 1);
 }
 
-void	rev_and_exe(char *path, char *argv, char **envp)
+void	rev_and_exe(char *path, char **argv, char **envp)
 {
-	char	**cmd_args;
+	//char	**cmd_args;
 
-	cmd_args = ft_split(argv, ' ');
-	execve(path, cmd_args, envp);
+	//cmd_args = ft_split(argv, ' ');
+	execve(path, argv, envp);
 }
 
 void	error_of_cmd(char **cmd)
