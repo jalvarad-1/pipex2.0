@@ -6,7 +6,7 @@
 /*   By: jalvarad <jalvarad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/14 09:43:32 by jalvarad          #+#    #+#             */
-/*   Updated: 2021/10/31 15:55:24 by jalvarad         ###   ########.fr       */
+/*   Updated: 2021/11/01 14:05:48 by jalvarad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,4 +55,5 @@ char	*search_path(char *argv, char **envp);
 char	**ft_mod_split(const char *s, char c);
 void	ft_lstadd_back(t_cmds **lst, t_cmds *new);
 t_cmds	*ft_lstnew(char **content);
+int	ft_lstsize(t_cmds *lst);
 #endif
