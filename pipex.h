@@ -6,7 +6,7 @@
 /*   By: jalvarad <jalvarad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/14 09:43:32 by jalvarad          #+#    #+#             */
-/*   Updated: 2021/11/01 14:05:48 by jalvarad         ###   ########.fr       */
+/*   Updated: 2021/11/02 16:53:01 by jalvarad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 typedef struct s_pipe_var
 {
 	int		fd1;
+	int		size;
 	int		**fd2;
 	int		status;
 	pid_t	pid;

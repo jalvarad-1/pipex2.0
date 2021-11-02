@@ -6,11 +6,26 @@
 /*   By: jalvarad <jalvarad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/14 09:43:27 by jalvarad          #+#    #+#             */
-/*   Updated: 2021/11/01 17:53:44 by jalvarad         ###   ########.fr       */
+/*   Updated: 2021/11/02 17:56:30 by jalvarad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
+
+void close_unnecessary(t_pipe_var info, int a, int b)
+{
+	int i;
+
+	i = 0;
+	while (i < info.size)
+	{
+		if (info.fd2[i][0] != a && info.fd2[i][0] != b)
+			close(info.fd2[i][0]);
+		if (info.fd2[i][1] != a && info.fd2[i][1] != b)
+			close(info.fd2[i][1]);
+		i++;	
+	}
+}
 
 void	kamikaze_son1(t_pipe_var info, char **argv, char **envp)
 {
@@ -21,9 +36,9 @@ void	kamikaze_son1(t_pipe_var info, char **argv, char **envp)
 		ft_putstr_fd("pipex: ", 1);
 		ft_putstr_fd(": No such file or directory or permission denied\n", 1);
 	}
-	printf("son 1: se cierra %d %d\n", info.fd2[0][READ_END], info.fd2[0][WRITE_END]);
+	close_unnecessary(info, info.fd2[0][READ_END], info.fd2[0][WRITE_END]);
 	close(info.fd2[0][READ_END]);
-	printf("1 dupp %d\n",dup2(info.fd2[0][WRITE_END], STDOUT_FILENO));
+	dup2(info.fd2[0][WRITE_END], STDOUT_FILENO);
 	close(info.fd2[0][WRITE_END]);
 	execve(info.path, argv, envp);
 	exit (0);
@@ -37,10 +52,11 @@ void	kamikaze_sonX(t_pipe_var info, char **argv, char **envp)
 		ft_putstr_fd(": Permission denied\n", 1);
 		exit(-1);
 	}
-	printf("son 1,5: cierra %d %d\n", info.fd2[info.l_p][READ_END], info.fd2[info.n_p][WRITE_END]);
-	printf("1,5 read dup  %d\n",dup2(info.fd2[info.l_p][READ_END], STDIN_FILENO));
+	close_unnecessary(info, info.fd2[info.l_p][READ_END], info.fd2[info.n_p][WRITE_END]);
+	dup2(info.fd2[info.l_p][READ_END], STDIN_FILENO);
 	close(info.fd2[info.l_p][READ_END]);
-	printf("1,5d write up %d\n",dup2(info.fd2[info.n_p][WRITE_END], STDOUT_FILENO));
+	//system("lsof -c pipex");
+	dup2(info.fd2[info.n_p][WRITE_END], STDOUT_FILENO);
 	close(info.fd2[info.n_p][WRITE_END]);
 	execve(info.path, argv, envp);
 	exit (1);
@@ -54,11 +70,9 @@ void	kamikaze_son2(t_pipe_var info, char **argv, char **envp)
 		ft_putstr_fd(": Permission denied\n", 1);
 		exit(-1);
 	}
-	printf("son 2: cierra %d \n", info.fd2[info.l_p][READ_END]);
-	//printf("kamikase 2  %s--- %d -- %d\n", info.path, info.l_p, info.n_p);
-	printf("2 dup %d\n", dup2(info.fd2[info.l_p][READ_END], STDIN_FILENO));
+	close_unnecessary(info, info.fd2[info.l_p][READ_END], -7);
+	dup2(info.fd2[info.l_p][READ_END], STDIN_FILENO);
 	close(info.fd2[info.l_p][READ_END]);
-	//printf("puta||||\n");
 	execve(info.path, argv, envp);
 	exit (1);
 }
@@ -66,7 +80,6 @@ void	kamikaze_son2(t_pipe_var info, char **argv, char **envp)
 void	psycho_parent(t_pipe_var info, char **argv, char **envp)
 {
 	info.pid = fork();
-	printf("extra process %d \n", getpid());
 	if (info.pid == -1)
 		exit(-1);
 	if (info.pid == 0)
@@ -108,6 +121,8 @@ int		**create_doble_array(t_cmds *cmd)
 	while (i < b)
 	{
 		pipe_array[i] = malloc(sizeof(int) * 2);
+		pipe_array[i][0] = -4;
+		pipe_array[i][1] = -4;
 		i++;
 	}
 	return (pipe_array);
@@ -121,77 +136,52 @@ int	main(int argc, char **argv, char **envp)
 	char **arg_split;
 	char **arg_split2;
 	char **arg_split3;
-	//char **arg_split4;
-	//char **arg_split5;
+	char **arg_split4;
 	int i;
-	int b; /// tamaño del array de pipes
+
 	i = 0;
 	cmd = NULL;
 	if(argc == 0 || !argv)
 		return 0;
-	arg_split = ft_mod_split(" cat  ", ' ');
+	arg_split = ft_mod_split(" cat     ", ' ');
 	save_cmd(&cmd, arg_split);
-	arg_split2 = ft_mod_split(" cat ", ' ');
+	arg_split2 = ft_mod_split(" cat   ", ' ');
 	save_cmd(&cmd, arg_split2); 
-	arg_split3 = ft_mod_split("  echo hoola ", ' ');
+	arg_split3 = ft_mod_split("  cat     ", ' ');
 	save_cmd(&cmd, arg_split3);
-	/*arg_split4 = ft_mod_split("  wc ", ' ');
+	arg_split4 = ft_mod_split("  echo hola     ", ' ');
 	save_cmd(&cmd, arg_split4);
-	arg_split5 = ft_mod_split(" grep 6 ", ' ');
-	save_cmd(&cmd, arg_split5);*/
-	b = ft_lstsize(cmd) - 1;
-	printf("%d\n", b);
-	//exit (0);
+	info.size = ft_lstsize(cmd) - 1;
+	//printf("%d\n", info.size);
 	info.fd2 = create_doble_array(cmd);
-	/*while (i < b)
-	{
-		pipe(info.fd2[i]);
-		printf("  %d ,  %d \n", info.fd2[i][READ_END], info.fd2[i][WRITE_END]);
-		i++;
-	}*/
+	close (19);
+	close (21);
+	//system("lsof -c pipex");
 	aux = cmd;
 	i = 0;
 	while (aux)
 	{
-		if (i < b)
+		if (i < info.size)
 			pipe(info.fd2[i]);
 		info.path = search_path(aux->content[0], envp);
 		if (aux->next)
-		{
-			//printf("padre----->%d\n", getpid());
 			info.pid = fork();
-			//printf("entrooooooo----->%d\n", getpid());
-		}
 		if (info.pid == -1)
 			exit(-1);
 		if (aux->next && info.pid == 0 && i == 0)
-		{
-			printf("son 1: path %s -- PID (%d)\n", info.path, getpid());
 			kamikaze_son1(info, aux->content, envp);
-		}
 		if (aux->next && i != 0 && info.pid == 0)
-		{
-			//printf("son x: path %s -- PID (%d)\n", info.path, getpid());
 			kamikaze_sonX(info, aux->content, envp);
-		}
 		if (!aux->next && info.pid != 0)
-		{
-			//printf("son 2: path %s -- PID (%d)\n", info.path, getpid());
 			psycho_parent(info, aux->content, envp);
-		}
 		if (info.pid != 0) 
 		{
 			free(info.path);
-			if (i < b)
+			if (i < info.size)
 			{
-				sleep(10);
-				printf(" se cierra escritura %d\n" ,info.fd2[i][WRITE_END]);
 				close(info.fd2[i][WRITE_END]);
 				if (i > 0)
-				{
-					printf(" se cierra lectura %d\n" ,info.fd2[info.l_p][READ_END]);
 					close(info.fd2[info.l_p][READ_END]);
-				}
 			}
 		}
 		if (info.pid != 0)
@@ -204,9 +194,8 @@ int	main(int argc, char **argv, char **envp)
 	}
 	while (info.pid != 0 && i > 0)
 	{
-		printf ("ha llegado %d\n", wait(&info.status));
+		wait(&info.status);
 		i--;
 	}
-	system("lsof -c pipex");
 	return (0);
 }
